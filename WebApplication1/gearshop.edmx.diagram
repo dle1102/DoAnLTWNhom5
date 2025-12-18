@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="468ddc31583b49b7b2843a087b3b801b" Name="Diagram1">
+        <EntityTypeShape EntityType="ShopGearModel.ChiTietDonHang" Width="1.5" PointX="8.125" PointY="8.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopGearModel.ChiTietPhieuNhap" Width="1.5" PointX="5.25" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopGearModel.ChiTietPhieuTra" Width="1.5" PointX="5.25" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopGearModel.DonHang" Width="1.5" PointX="0.75" PointY="11.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopGearModel.LoaiSanPham" Width="1.5" PointX="0.75" PointY="4.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopGearModel.NhaCungCap" Width="1.5" PointX="0.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopGearModel.PhieuNhap" Width="1.5" PointX="3" PointY="7.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopGearModel.PhieuTra" Width="1.5" PointX="3" PointY="11.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopGearModel.SanPham" Width="1.5" PointX="3" PointY="2.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopGearModel.TaiKhoan" Width="1.5" PointX="5" PointY="15.25" IsExpanded="true" />
+        <AssociationConnector Association="ShopGearModel.FK__ChiTietDon__MaDH__4F7CD00D" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__ChiTietDon__MaSP__5070F446" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__ChiTietPh__MaPhi__5FB337D6" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__ChiTietPhi__MaSP__60A75C0F" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__ChiTietPh__MaPhi__5812160E" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__ChiTietPhi__MaSP__59063A47" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__DonHang__MaTK__49C3F6B7" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__PhieuTra__MaDH__534D60F1" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__SanPham__MaLoai__4222D4EF" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__PhieuNhap__MaNCC__5BE2A6F2" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopGearModel.FK__SanPham__MaNCC__4316F928" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

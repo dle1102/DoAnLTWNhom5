@@ -1,0 +1,18 @@
+﻿@model WebApplication1.TaiKhoan
+
+@{
+    ViewBag.Title = "Xoa";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h3>Bạn có chắc chắn muốn xóa tài khoản "@Model.TenDangNhap"?</h3>
+
+@using (Html.BeginForm("Xoa", "QuanLiNguoiDung", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.MaTK)
+
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Hủy</a>
+}
+

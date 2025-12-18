@@ -1,0 +1,321 @@
+﻿@using WebApplication1.Models
+@model List<GioHang>
+
+@{
+    ViewBag.Title = "Thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var user = ViewBag.User as WebApplication1.TaiKhoan;
+
+    decimal tongTienHang = (decimal)ViewBag.TongTien;
+    decimal phiShip = 30000;
+    decimal tongThanhToan = tongTienHang + phiShip;
+}
+
+<style>
+    .checkout-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 15px;
+        color: #fff;
+    }
+
+    /* TIÊU ĐỀ TRANG */
+    .checkout-title {
+        font-size: 2rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #fff;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        border-bottom: 2px solid #334155;
+        padding-bottom: 15px;
+    }
+
+        .checkout-title i {
+            color: #2dd4bf;
+            margin-right: 15px;
+            font-size: 2.2rem;
+        }
+
+    /* KHUNG THÔNG TIN */
+    .info-card {
+        background-color: #1e293b !important;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 30px;
+        height: 100%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    /* KHUNG ĐƠN HÀNG */
+    .summary-card {
+        background-color: #0f172a !important;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 25px;
+        position: sticky;
+        top: 20px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .section-header {
+        color: #94a3b8;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        border-bottom: 1px solid #334155;
+        padding-bottom: 10px;
+    }
+
+    .mt-custom {
+        margin-top: 40px !important;
+    }
+
+    .form-label {
+        color: #cbd5e1;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    /* INPUT VÀ SELECT */
+    .form-control, .form-select {
+        background-color: #020617;
+        border: 1px solid #475569;
+        color: #fff;
+        padding: 12px 15px;
+        border-radius: 6px;
+        transition: 0.3s;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+        .form-control:focus, .form-select:focus {
+            background-color: #020617;
+            border-color: #2dd4bf;
+            color: #fff;
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+        }
+
+        /* Ô READONLY (Họ tên) */
+        .form-control[readonly] {
+            background-color: #020617 !important;
+            border: 1px solid #475569 !important;
+            color: #fff !important;
+            opacity: 1 !important;
+            cursor: not-allowed;
+        }
+
+    .cart-mini-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #1e293b;
+    }
+
+    .cart-mini-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 15px;
+        border: 1px solid #334155;
+        background-color: #fff;
+    }
+
+    /* NÚT ĐẶT HÀNG */
+    .btn-checkout-style {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        margin-top: 25px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+        color: #0f172a;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .btn-checkout-style:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(45, 212, 191, 0.3);
+            color: #0f172a;
+        }
+
+    .btn-back {
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: 0.3s;
+        display: inline-block;
+        margin-top: 15px;
+    }
+
+        .btn-back:hover {
+            color: #2dd4bf;
+            transform: translateX(-5px);
+        }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-title">
+        <i class="bi bi-wallet2"></i>
+        <span>Thanh toán</span>
+    </div>
+
+    @using (Html.BeginForm("DatHang", "GioHang", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <div class="col-lg-7 mb-4">
+                <div class="info-card">
+                    <div class="section-header">
+                        Thông tin người nhận
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" class="form-control" value="@(user != null ? user.HoTen : "")" readonly />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="text" name="SoDienThoai" class="form-control" value="@(user != null ? user.SoDienThoai : "")" required placeholder="Nhập số điện thoại..." />
+                        </div>
+                    </div>
+
+                    <div class="section-header mt-custom">
+                        Địa chỉ giao hàng
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tỉnh / Thành phố <span class="text-danger">*</span></label>
+                            <select id="tinh" name="TinhThanh" class="form-select" required>
+                                <option value="">-- Chọn Tỉnh/Thành --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Quận / Huyện <span class="text-danger">*</span></label>
+                            <select id="quan" name="QuanHuyen" class="form-select" required>
+                                <option value="">-- Chọn Quận/Huyện --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ cụ thể <span class="text-danger">*</span></label>
+                        <input type="text" name="DiaChiCuThe" class="form-control" required placeholder="Số nhà, Tên đường, Phường/Xã..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú (Tùy chọn)</label>
+                        <textarea name="GhiChu" class="form-control" rows="2" placeholder="Ví dụ: Gọi trước khi giao..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="summary-card">
+                    <div class="section-header text-center" style="border-bottom-color: #2dd4bf;">
+                        Đơn hàng của bạn
+                    </div>
+
+                    <div style="max-height: 350px; overflow-y: auto; padding-right: 5px; margin-bottom: 20px;">
+                        @foreach (var item in Model)
+                        {
+                            <div class="cart-mini-item">
+                                <img src="~/Content/HinhAnh/@item.sHinhAnh" class="cart-mini-img" />
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-white mb-1">@item.sTenSP</div>
+                                    <div class="d-flex justify-content-between text-muted small">
+                                        <span>SL: <strong class="text-white">@item.iSoLuong</strong></span>
+                                        <span>@String.Format("{0:#,##0}", item.dDonGia)₫</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="pt-3 border-top border-secondary">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tạm tính:</span>
+                            <span class="text-white fw-bold">@String.Format("{0:#,##0}", tongTienHang)₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Vận chuyển:</span>
+                            <span style="color: #2dd4bf; font-weight: bold;">@String.Format("{0:#,##0}", phiShip)₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-white text-uppercase fw-bold">Tổng cộng:</span>
+                            <span style="color: #2dd4bf; font-size: 1.5rem; font-weight: 800;">
+                                @String.Format("{0:#,##0}", tongThanhToan)₫
+                            </span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-checkout-style">
+                        <i class="bi bi-bag-check-fill me-2"></i> Xác nhận đặt hàng
+                    </button>
+
+                    <div class="text-center">
+                        <a href="@Url.Action("GioHang", "GioHang")" class="btn-back">
+                            <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // API Tỉnh thành
+            $.getJSON('https://esgoo.net/api-tinhthanh/1/0.htm', function (data_tinh) {
+                if (data_tinh.error == 0) {
+                    $.each(data_tinh.data, function (key_tinh, val_tinh) {
+                        $("#tinh").append('<option value="' + val_tinh.id + '" data-fullname="' + val_tinh.full_name + '">' + val_tinh.full_name + '</option>');
+                    });
+                }
+            });
+
+            $("#tinh").change(function (e) {
+                var id_tinh = $(this).val();
+                $("#quan").html('<option value="">-- Chọn Quận/Huyện --</option>');
+                if (id_tinh != "") {
+                    $.getJSON('https://esgoo.net/api-tinhthanh/2/' + id_tinh + '.htm', function (data_quan) {
+                        if (data_quan.error == 0) {
+                            $.each(data_quan.data, function (key_quan, val_quan) {
+                                $("#quan").append('<option value="' + val_quan.full_name + '">' + val_quan.full_name + '</option>');
+                            });
+                        }
+                    });
+                }
+            });
+
+            $("form").submit(function () {
+                var tenTinh = $("#tinh option:selected").data('fullname');
+                if (tenTinh) {
+                    $("<input />").attr("type", "hidden").attr("name", "TinhThanh").attr("value", tenTinh).appendTo("form");
+                    $("#tinh").removeAttr("name");
+                }
+                return true;
+            });
+        });
+    </script>
+}

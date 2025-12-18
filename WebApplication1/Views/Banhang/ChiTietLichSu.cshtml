@@ -1,0 +1,207 @@
+﻿@model WebApplication1.DonHang
+@{
+    ViewBag.Title = "Chi tiết đơn #" + Model.MaDH;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .detail-container {
+        max-width: 800px;
+        margin: 40px auto;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .invoice-card {
+        background: #1e293b;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 1px solid #334155;
+    }
+
+    .invoice-header {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        padding: 30px;
+        border-bottom: 1px solid #334155;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .invoice-title h2 {
+        color: #fff;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .invoice-title span {
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    .invoice-body {
+        padding: 30px;
+    }
+
+    .info-group {
+        margin-bottom: 25px;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    /* Table sản phẩm */
+    .product-list {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+        .product-list th {
+            text-align: left;
+            color: #94a3b8;
+            font-weight: 500;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .product-list td {
+            padding: 15px 0;
+            color: #e2e8f0;
+            border-bottom: 1px solid #334155;
+            vertical-align: middle;
+        }
+
+    .thumb-img {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #0f172a;
+        border: 1px solid #334155;
+        margin-right: 15px;
+    }
+
+    .total-section {
+        background: #0f172a;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .final-price {
+        font-size: 1.5rem;
+        color: #2dd4bf;
+        font-weight: 800;
+        margin-left: 20px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        color: #94a3b8;
+        text-decoration: none;
+        margin-bottom: 20px;
+        transition: 0.3s;
+    }
+
+        .back-btn:hover {
+            color: #2dd4bf;
+            transform: translateX(-5px);
+        }
+</style>
+
+<div class="detail-container">
+    <a href="@Url.Action("LichSuDonHang", "Banhang")" class="back-btn">
+        <i class="bi bi-arrow-left me-2"></i> Quay lại danh sách
+    </a>
+
+    <div class="invoice-card">
+        <div class="invoice-header">
+            <div class="invoice-title">
+                <h2>Đơn hàng #@Model.MaDH</h2>
+                <span>Ngày đặt: @String.Format("{0:dd/MM/yyyy HH:mm}", Model.NgayDat)</span>
+            </div>
+
+            @{
+                string statusColor = "#94a3b8";
+                string statusText = Model.TrangThai;
+                if (Model.TrangThai == "cho_xac_nhan") { statusColor = "#facc15"; statusText = "Chờ xác nhận"; }
+                if (Model.TrangThai == "dang_giao") { statusColor = "#60a5fa"; statusText = "Đang giao hàng"; }
+                if (Model.TrangThai == "hoan_thanh") { statusColor = "#4ade80"; statusText = "Hoàn thành"; }
+                if (Model.TrangThai == "da_huy") { statusColor = "#f87171"; statusText = "Đã hủy"; }
+            }
+            <div style="text-align: right;">
+                <span style="display: block; color: #64748b; font-size: 0.8rem;">Trạng thái</span>
+                <span style="color: @statusColor; font-weight: 700; font-size: 1.1rem; text-transform: uppercase;">
+                    @statusText
+                </span>
+            </div>
+        </div>
+
+        <div class="invoice-body">
+            <div class="row">
+                <div class="col-md-6 info-group">
+                    <div class="info-label">Người nhận</div>
+                    <div class="info-value fw-bold">@(Model.TaiKhoan != null ? Model.TaiKhoan.HoTen : "Khách")</div>
+                    <div class="info-value text-muted small">@Model.DiaChiGiao</div>
+                </div>
+                <div class="col-md-6 info-group">
+                    <div class="info-label">Ghi chú đơn hàng</div>
+                    <div class="info-value fst-italic">"@(string.IsNullOrEmpty(Model.GhiChu) ? "Không có ghi chú" : Model.GhiChu)"</div>
+                </div>
+            </div>
+
+            
+            <table class="product-list">
+                <thead>
+                    <tr>
+                        <th style="width: 50%">Sản phẩm</th>
+                        <th class="text-center">SL</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-end">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ChiTietDonHangs)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @if (!string.IsNullOrEmpty(item.SanPham.HinhAnh))
+                                    {
+                                        <img src="~/Content/HinhAnh/@item.SanPham.HinhAnh" class="thumb-img" />
+                                    }
+                                    else
+                                    {
+                                        <div class="thumb-img d-flex align-items-center justify-content-center text-muted small">No Img</div>
+                                    }
+                                    <span class="fw-semibold">@item.SanPham.TenSP</span>
+                                </div>
+                            </td>
+                            <td class="text-center">x @item.SoLuong</td>
+                            <td class="text-end text-muted">@String.Format("{0:#,##0}", item.DonGia)</td>
+                            <td class="text-end fw-bold text-white">@String.Format("{0:#,##0}", item.SoLuong * item.DonGia)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="total-section">
+            <span class="text-muted text-uppercase me-3">Tổng thanh toán</span>
+            <span class="final-price">@String.Format("{0:#,##0}", Model.TongTien)₫</span>
+        </div>
+    </div>
+</div>

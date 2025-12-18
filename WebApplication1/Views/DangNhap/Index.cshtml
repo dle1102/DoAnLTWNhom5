@@ -1,0 +1,35 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- MAIN FORM LOGIN-->
+<div class="container">
+    <div class="login-container mt-4" style="width: 400px; margin:auto">
+        <div class="card shadow-lg p-3">
+            <h3 class="card-title text-center fw-bold text-primary mb-4">Đăng nhập</h3>
+            @using (Html.BeginForm("XuLyFormDN", "DangNhap", new { duongdan = ViewBag.url }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label for="loginEmail" class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" id="loginEmail" required>
+                </div>
+                <div class="mb-3"  style="margin-top:10px;">
+                    <label for="loginPassword" class="form-label">Mật khẩu</label>
+                    <input type="password" name="password" class="form-control" id="loginPassword" required>
+                </div>
+                <div class="mb-3">
+                    <button type="submit" style="margin-top:20px; margin-left:130px;margin-bottom:20px;" class="btn btn-primary w-100 mb-3">ĐĂNG NHẬP</button>
+                    <p class="text-center">
+                        Chưa có tài khoản? <a href="LTW_register.html" class="text-decoration-none fw-bold">Đăng ký ngay</a>
+                    </p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- MAIN FORM LOGIN -->
+

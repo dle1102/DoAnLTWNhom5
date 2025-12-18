@@ -1,0 +1,48 @@
+﻿@model List<LoaiSanPham>
+<form action="#" method="get" class="row g-3">
+    <!-- Tên sản phẩm -->
+    <!-- Từ khóa -->
+    <div class="col-12 col-md-12">
+        <label for="kw" class="form-label">Từ khóa</label>
+        <input type="text" class="form-control" id="kw" name="kw" placeholder="Từ khóa...">
+    </div>
+    <!-- Chủ đề -->
+    <div class="col-12 col-md-12">
+        <label for="chude" class="form-label">Chủ đề</label>
+        <select id="chude" name="chude" class="form-select">
+            <option value="" selected>-- Chọn thể loại --</option>
+            @foreach (var item in Model)
+            {
+                <option value="@item.MaLoai">@item.TenLoai</option>
+            }
+        </select>
+    </div>
+    <!-- Giá -->
+    <div class="col-12 col-md-12">
+        <span class="form-label d-block mb-1">Giá</span>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="0-10000" id="g1" name="gia[]">
+            <label class="form-check-label" for="g1">0–10.000 VNĐ</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="11000-20000" id="g2" name="gia[]">
+            <label class="form-check-label" for="g2">11.000–20.000 VNĐ</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="21000-40000" id="g3" name="gia[]">
+            <label class="form-check-label" for="g3">21.000–40.000 VNĐ</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value=">40000" id="g4" name="gia[]">
+            <label class="form-check-label" for="g4">Lớn hơn 40.000 VNĐ</label>
+        </div>
+    </div>
+
+    <!-- Nút Search -->
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary px-4">Tìm kiếm</button>
+        <button type="reset" class="btn btn btn-danger">Xóa</button>
+    </div>
+</form>
+<!--Tìm kiếm nâng cao-->
+

@@ -1,0 +1,87 @@
+﻿@model WebApplication1.DonHang
+@{
+    ViewBag.Title = "Chi Tiết Đơn Hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <!-- Giảm từ col-xl-10 xuống col-xl-9, và bỏ offset để tự căn giữa -->
+        <div class="col-lg-11 col-xl-9">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-receipt me-2"></i>
+                        Chi Tiết Đơn Hàng #@Model.MaDH
+                    </h4>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <dl class="row g-4 mb-0">
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Mã Đơn Hàng</dt>
+                        <dd class="col-md-9 col-lg-9">#@Model.MaDH</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Mã Tài Khoản</dt>
+                        <dd class="col-md-9 col-lg-9">@Model.MaTK</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Ngày Đặt</dt>
+                        <dd class="col-md-9 col-lg-9">@Html.DisplayFor(model => model.NgayDat)</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Tổng Tiền Hàng</dt>
+                        <dd class="col-md-9 col-lg-9">@string.Format("{0:N0} ₫", Model.TongTien)</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Trạng Thái</dt>
+                        <dd class="col-md-9 col-lg-9">
+                            <span class="badge bg-@(Model.TrangThai == "hoan_thanh" ? "success" :
+                                                   Model.TrangThai == "dang_giao" ? "primary" :
+                                                   Model.TrangThai == "da_huy" ? "danger" :
+                                                   Model.TrangThai == "cho_xac_nhan" ? "warning" : "secondary") fs-6 px-3 py-2">
+                                @Html.DisplayFor(model => model.TrangThai)
+                            </span>
+                        </dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Địa Chỉ Giao</dt>
+                        <dd class="col-md-9 col-lg-9">@Html.DisplayFor(model => model.DiaChiGiao)</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Ghi Chú Khách</dt>
+                        <dd class="col-md-9 col-lg-9">@(string.IsNullOrEmpty(Model.GhiChu) ? "-" : Model.GhiChu)</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Ngày Giao</dt>
+                        <dd class="col-md-9 col-lg-9">@(Model.NgayGiao.HasValue ? Model.NgayGiao.Value.ToString("dd/MM/yyyy HH:mm") : "-")</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Phí Ship</dt>
+                        <dd class="col-md-9 col-lg-9">@string.Format("{0:N0} ₫", Model.PhiShip)</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Điện Thoại</dt>
+                        <dd class="col-md-9 col-lg-9">@Html.DisplayFor(model => model.DienThoaiGiao)</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Người Nhận</dt>
+                        <dd class="col-md-9 col-lg-9">@Html.DisplayFor(model => model.NguoiNhan)</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Lý Do Hủy</dt>
+                        <dd class="col-md-9 col-lg-9">@(string.IsNullOrEmpty(Model.LyDoHuy) ? "-" : Model.LyDoHuy)</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Ghi Chú Admin</dt>
+                        <dd class="col-md-9 col-lg-9">@(string.IsNullOrEmpty(Model.GhiChu_Admin) ? "-" : Model.GhiChu_Admin)</dd>
+
+                        
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Cập Nhật Lần Cuối</dt>
+                        <dd class="col-md-9 col-lg-9">@Html.DisplayFor(model => model.NgayCapNhat)</dd>
+
+                        <dt class="col-md-3 col-lg-3 fw-bold text-muted">Tổng Thanh Toán</dt>
+                        <dd class="col-md-9 col-lg-9">
+                            <strong class="text-success fs-5">@string.Format("{0:N0} ₫", Model.TongThanhToan)</strong>
+                        </dd>
+                    </dl>
+                </div>
+
+                <div class="card-footer bg-light text-end py-3">
+                    <a href="@Url.Action("DonHang", "AdminPage")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Quay Lại Danh Sách
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,162 @@
+﻿@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div id="product-detail">
+        <!-- Sản phẩm sẽ được tải bằng AJAX -->
+        <div id="loading" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khu vực sản phẩm liên quan -->
+    <div id="related-products" class="mt-5"></div>
+
+    <!-- Khu vực sản phẩm cùng NCC -->
+    <div id="same-supplier-products" class="mt-5"></div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Lấy mã sản phẩm từ URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const masp = urlParams.get('masp');
+
+            if (!masp) {
+                window.location.href = '@Url.Action("Index", "BanHang")';
+                return;
+            }
+
+            // Base URL cho ảnh và action
+            const imgBaseUrl = '@Url.Content("~/Content/HinhAnh/")';
+            const noImgUrl = '@Url.Content("~/Content/HinhAnh/no-image.jpg")';
+            const addToCartBaseUrl = '@Url.Action("ThemGioHang", "GioHang")';
+            const detailBaseUrl = '@Url.Action("ChiTietSP", "BanHang")';
+
+            // 1. Load chi tiết sản phẩm
+            $.ajax({
+                url: '@Url.Content("~/api/sanpham/chitiet/")' + masp,
+                type: 'GET',
+                success: function (product) {
+                    renderProductDetail(product);
+                    // Load sản phẩm liên quan
+                    loadRelatedProducts(masp);
+                    // Load sản phẩm cùng NCC
+                    loadSameSupplierProducts(masp);
+                },
+                error: function () {
+                    $('#product-detail').html(`
+                        <div class="text-center">
+                            <h3>Sản phẩm không tồn tại</h3>
+                            <a href="@Url.Action("Index", "BanHang")" class="btn btn-primary">Quay lại</a>
+                        </div>
+                    `);
+                }
+            });
+
+            // Hàm render chi tiết sản phẩm
+            function renderProductDetail(product) {
+                const imgUrl = product.HinhAnh ? (imgBaseUrl + product.HinhAnh) : noImgUrl;
+                const addToCartUrl = `${addToCartBaseUrl}?iMaSP=${product.MaSP}&strURL=${encodeURIComponent(window.location.href)}`;
+
+                const html = `
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="card shadow-sm border-0">
+                            <img src="${imgUrl}" alt="${product.TenSP}"
+                                 style="width: 100%; height: 200px;">
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <h2 class="mb-3 text-primary">${product.TenSP}</h2>
+                        <h4 class="text-danger fw-bold">${formatCurrency(product.GiaBan)} VNĐ</h4>
+                        <p class="mt-3" style="line-height: 1.8; font-size: 1.1rem; text-align: justify;">
+                            ${product.MoTa || ''}
+                        </p>
+                        <div class="mt-4">
+                            <a href="${addToCartUrl}"
+                               class="btn btn-success btn-lg px-4">
+                                <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                            </a>
+                            <a href="@Url.Action("Index", "BanHang")" class="btn btn-outline-secondary btn-lg px-4 ms-2">
+                                <i class="bi bi-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+
+                $('#product-detail').html(html);
+            }
+
+            // 2. Load sản phẩm liên quan
+            function loadRelatedProducts(masp) {
+                $.ajax({
+                    url: '@Url.Content("~/api/sanpham/lienquan/")' + masp,
+                    type: 'GET',
+                    success: function (products) {
+                        if (products && products.length > 0) {
+                            renderProductSection(products, 'related-products', 'Sản phẩm liên quan', 'text-primary');
+                        }
+                    }
+                });
+            }
+
+            // 3. Load sản phẩm cùng NCC
+            function loadSameSupplierProducts(masp) {
+                $.ajax({
+                    url: '@Url.Content("~/api/sanpham/cungncc/")' + masp,
+                    type: 'GET',
+                    success: function (products) {
+                        if (products && products.length > 0) {
+                            renderProductSection(products, 'same-supplier-products', 'Sản phẩm cùng nhà cung cấp', 'text-info');
+                        }
+                    }
+                });
+            }
+
+            // Hàm render danh sách sản phẩm (liên quan / cùng NCC)
+            function renderProductSection(products, containerId, title, titleClass) {
+                let html = `<h4 class="mb-4 ${titleClass}">${title}</h4><div class="row g-4">`;
+
+                products.forEach(function (item) {
+                    const imgUrl = item.HinhAnh ? (imgBaseUrl + item.HinhAnh) : noImgUrl;
+                    const detailUrl = `${detailBaseUrl}?masp=${item.MaSP}`;
+                    const addToCartUrl = `${addToCartBaseUrl}?iMaSP=${item.MaSP}&strURL=${encodeURIComponent(window.location.href)}`;
+
+                    html += `
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <article class="product-card h-100 text-center">
+                            <a href="${detailUrl}" class="text-decoration-none">
+                                <div class="thumb mb-3">
+                                    <img src="${imgUrl}" class="img-fluid rounded" alt="${item.TenSP}" style="height: 180px;">
+                                </div>
+                                <h6 class="mb-2">${item.TenSP}</h6>
+                            </a>
+                            <p class="text-success fw-bold mb-2">
+                                ${formatCurrency(item.GiaBan)} ₫
+                            </p>
+                            <a href="${addToCartUrl}"
+                               class="btn btn-outline-success btn-sm w-100">
+                                Thêm vào giỏ
+                            </a>
+                        </article>
+                    </div>`;
+                });
+
+                html += '</div>';
+                $('#' + containerId).html(html);
+            }
+
+            // Hàm format tiền
+            function formatCurrency(amount) {
+                const num = parseFloat(amount) || 0;
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+        });
+    </script>
+}

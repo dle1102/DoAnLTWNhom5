@@ -1,0 +1,315 @@
+﻿@using WebApplication1.Models
+@model List<GioHang>
+
+@{
+    ViewBag.Title = "Giỏ hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* CART PREMIUM CSS */
+    .cart-wrapper {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #0b0e14;
+        color: #e0e6ed;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    .cart-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .cart-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid #2a3441;
+        padding-bottom: 20px;
+    }
+
+    .cart-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0;
+    }
+
+    .cart-count {
+        background: #2dd4bf;
+        color: #000;
+        font-weight: bold;
+        padding: 2px 10px;
+        border-radius: 20px;
+        margin-left: 15px;
+        font-size: 1rem;
+    }
+
+    /* BẢNG SẢN PHẨM */
+    .cart-table-wrapper {
+        background: #151a23;
+        border-radius: 12px;
+        border: 1px solid #2a3441;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .c-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .c-table th {
+            text-align: left;
+            padding: 18px 25px;
+            background: #0f141c;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #2a3441;
+        }
+
+        .c-table td {
+            padding: 20px 25px;
+            border-bottom: 1px solid #2a3441;
+            vertical-align: middle;
+            color: #fff;
+        }
+
+    .c-product {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    /* FIX ẢNH BỊ TO: Dùng !important để ép kích thước 80px */
+    .c-img {
+        width: 80px !important;
+        height: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #fff;
+        border: 1px solid #444;
+    }
+
+    .c-name {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 5px;
+        display: block;
+        color: #fff;
+    }
+
+    .c-code {
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    /* Ô NHẬP SỐ LƯỢNG */
+    .c-qty-input {
+        background: #0b0e14;
+        border: 1px solid #334155;
+        color: #fff;
+        padding: 8px;
+        border-radius: 6px;
+        width: 60px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+        .c-qty-input:focus {
+            outline: 1px solid #2dd4bf;
+        }
+
+    .c-price {
+        color: #2dd4bf;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    /* ĐỔI STYLE NÚT XÓA THÀNH CHỮ CHO DỄ NHÌN */
+    .c-delete {
+        color: #ef4444;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.9rem;
+        border: 1px solid #ef4444;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: 0.2s;
+        display: inline-block;
+    }
+
+        .c-delete:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+
+    /* TỔNG KẾT */
+    .cart-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .cart-summary {
+        background: #151a23;
+        border: 1px solid #2a3441;
+        border-radius: 12px;
+        padding: 30px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .sum-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        color: #cbd5e1;
+    }
+
+    .sum-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #2a3441;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .btn-checkout {
+        display: block;
+        width: 100%;
+        text-align: center;
+        background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+        color: #0f172a;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        margin-top: 25px;
+        transition: 0.3s;
+    }
+
+        .btn-checkout:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(45, 212, 191, 0.3);
+            color: #0f172a;
+        }
+
+    .btn-back {
+        color: #94a3b8;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .btn-back:hover {
+            color: #2dd4bf;
+        }
+</style>
+
+<div class="cart-wrapper">
+    <div class="cart-container">
+
+        <div class="cart-header">
+            <h1 class="cart-title">Giỏ hàng của bạn</h1>
+            <span class="cart-count">@(Model != null ? Model.Count : 0)</span>
+        </div>
+
+        @if (Model == null || Model.Count == 0)
+        {
+            <div style="text-align: center; padding: 60px; background: #151a23; border-radius: 12px; border: 1px dashed #334155;">
+                <h3 style="color: #fff; margin-top: 20px;">Giỏ hàng trống trơn</h3>
+                <p style="color: #94a3b8; margin-bottom: 30px;">Bạn chưa thêm món gear nào vào đây cả.</p>
+                <a href="@Url.Action("Index", "Banhang")" class="btn-checkout" style="max-width: 250px; margin: 0 auto;">
+                    Quay lại mua sắm
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="cart-table-wrapper">
+                <table class="c-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">Sản phẩm</th>
+                            <th style="width: 15%">Đơn giá</th>
+                            <th style="width: 15%; text-align: center;">Số lượng</th>
+                            <th style="width: 15%; text-align: right;">Thành tiền</th>
+                            <th style="width: 5%">Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="c-product">
+                                        <img src="@Url.Content("~/Content/HinhAnh/" + item.sHinhAnh)" class="c-img" alt="sp">
+                                        <div>
+                                            <span class="c-name">@item.sTenSP</span>
+                                            <span class="c-code">Mã SP: #@item.iMaSP</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="color: #cbd5e1;">@string.Format("{0:#,##0}", item.dDonGia)₫</td>
+                                <td style="text-align: center;">
+                                    @using (Html.BeginForm("CapNhatGioHang", "GioHang", new { iMaSP = item.iMaSP }, FormMethod.Post))
+                                    {
+                                        <input type="number" name="txtSoLuong" value="@item.iSoLuong" min="1"
+                                               class="c-qty-input" onchange="this.form.submit()" />
+                                    }
+                                </td>
+                                <td style="text-align: right;" class="c-price">
+                                    @string.Format("{0:#,##0}", item.dThanhTien)₫
+                                </td>
+                                <td style="text-align: right;">
+                                    <a href="@Url.Action("XoaGioHang", "GioHang", new { iMaSP = item.iMaSP })"
+                                       class="c-delete">
+                                        Xóa
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cart-footer">
+                <div style="flex: 1; padding-top: 20px;">
+                    <a href="@Url.Action("Index", "Banhang")" class="btn-back">
+                        Tiếp tục mua hàng
+                    </a>
+                </div>
+
+                <div class="cart-summary">
+                    <div class="sum-row">
+                        <span>Tạm tính:</span>
+                        <span>@string.Format("{0:#,##0}", ViewBag.TongTien)₫</span>
+                    </div>
+                    <div class="sum-row">
+                        <span>Vận chuyển:</span>
+                        <span style="color: #2dd4bf;">30.000₫</span>
+                    </div>
+                    <div class="sum-total">
+                        <span>Tổng cộng:</span>
+                        <span style="color: #2dd4bf;">@string.Format("{0:#,##0}", ViewBag.TongTien + 30000)₫</span>
+                    </div>
+
+                    <a href="@Url.Action("DatHang", "GioHang")" class="btn-checkout">
+                        TIẾN HÀNH THANH TOÁN
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

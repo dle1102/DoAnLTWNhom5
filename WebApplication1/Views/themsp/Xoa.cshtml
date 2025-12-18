@@ -1,0 +1,17 @@
+﻿@model WebApplication1.Models.SP
+
+@{
+    ViewBag.Title = "Xoa";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h3>Bạn có chắc chắn xóa "@Model.TenSP"?</h3>
+
+@using (Html.BeginForm("Xoa", "ThemSP", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.MaSP)
+
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Hủy</a>
+}

@@ -1,0 +1,226 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var tongDoanhThu = ViewBag.TongDoanhThu as decimal? ?? 0;
+    var tongDonHang = ViewBag.TongDonHang as int? ?? 0;
+    var khachHangMoi = ViewBag.KhachHangMoi as int? ?? 0;
+    var giaTriTB = ViewBag.GiaTriTrungBinh as decimal? ?? 0;
+}
+<style>
+    .bg-primary {
+        transition: all 0.4s ease !important;
+    }
+
+        .bg-primary:hover {
+            transform: translateY(-4px);
+        }
+
+    .badge {
+        font-weight: 600;
+    }
+    .hover-glow {
+        pointer-events: none;
+    }
+
+    .text-center:hover .hover-glow {
+        opacity: 1 !important;
+    }
+
+    .text-center:hover .bg-primary {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(19, 127, 236, 0.4) !important;
+    }
+</style>
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-5">
+        <h1 class="display-5 fw-bold mb-0">Tổng Quan</h1>
+        <div class="d-flex gap-3">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                   @ViewBag.KhoangThoiGian <i class="bi bi-chevron-down ms-1"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="@Url.Action("Index", "AdminPage", new { period = "1" })">1 ngày gần nhất</a></li>
+                    <li><a class="dropdown-item" href="@Url.Action("Index", "AdminPage", new { period = "7" })">7 ngày gần nhất</a></li>
+                    <li><a class="dropdown-item" href="@Url.Action("Index", "AdminPage", new { period = "30" })">30 ngày gần nhất</a></li>
+                </ul>
+            </div>
+          
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Tổng Doanh Thu</p>
+                    <h3 class="mb-2 fw-bold">@tongDoanhThu.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) đ</h3>
+                        <small class="text-success fw-medium"><i class="bi bi-arrow-up"></i> 5.2%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Tổng Đơn Hàng</p>
+                    <h3 class="mb-2 fw-bold">@tongDonHang.ToString("#,##0")</h3>
+                    <small class="text-success fw-medium"><i class="bi bi-arrow-up"></i> 2.1%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Khách Hàng Mới</p>
+                    <h3 class="mb-2 fw-bold">@khachHangMoi.ToString("#,##0")</h3>
+                    <small class="text-danger fw-medium"><i class="bi bi-arrow-down"></i> -1.5%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Giá Trị Trung Bình Mỗi Đơn Hàng</p>
+                    <h3 class="mb-2 fw-bold">@giaTriTB.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) đ</h3>
+                    <small class="text-success fw-medium"><i class="bi bi-arrow-up"></i> 0.8%</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4 mb-5">
+
+        <!-- Top Products -->
+        <div class="col-12 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Sản Phẩm Bán Chạy</h5>
+
+                    @if (ViewBag.TopSanPhamBanChay != null && ((List<WebApplication1.Models.SanPhamBanChay>)ViewBag.TopSanPhamBanChay).Count > 0)
+                    {
+                        <div class="d-flex align-items-end justify-content-between flex-grow-1 mt-4 gap-3">
+                            @foreach (WebApplication1.Models.SanPhamBanChay sp in ViewBag.TopSanPhamBanChay)
+                            {
+                                <div class="text-center flex-fill">
+                                    <!-- Cột biểu đồ -->
+                                    <!-- Cột biểu đồ - chỉ còn cột màu + hiệu ứng -->
+                                    <div class="position-relative mx-auto" style="height: 140px; width: 50px;">
+                                        <!-- Cột chính (vuông, bo góc dưới, có bóng + hover đẹp) -->
+                                        <div class="bg-primary position-absolute bottom-0 start-0 w-100 rounded-bottom shadow-sm"
+                                             style="height: @(sp.phantramban)%;
+                transition: all 0.6s ease-out;
+                background: linear-gradient(to top, #0d6efd, #4d94ff);">
+                                        </div>
+
+                                        <!-- Hiệu ứng sáng nhẹ khi hover (tùy chọn, cực chất) -->
+                                        <div class="position-absolute bottom-0 start-0 w-100 rounded-bottom opacity-0 hover-glow"
+                                             style="height: @(sp.phantramban)%;
+                background: linear-gradient(transparent, rgba(255,255,255,0.4));
+                transition: opacity 0.4s;">
+                                        </div>
+                                    </div>
+
+                                    <!-- Tên sản phẩm (cắt ngắn + tooltip) -->
+                                    <small class="text-muted d-block mt-2" title="@sp.TenSP">
+                                        @(sp.TenSP.Length > 11 ? sp.TenSP.Substring(0,11)+"..." : sp.TenSP)
+                                    </small>
+
+                                    <!-- Số lượng bán -->
+                                    <span class="badge bg-primary fs-6">@sp.SoLuongBan</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mt-5">Chưa có đơn hàng hoàn thành</p>
+                    }
+                </div>
+            </div>
+        </div>
+        @if (ViewBag.SanPhamSapHetHang != null && ((List<WebApplication1.SanPham>)ViewBag.SanPhamSapHetHang).Count > 0)
+        {
+            var listSapHet = (List<WebApplication1.SanPham>)ViewBag.SanPhamSapHetHang;
+
+            if (listSapHet.Any())
+            {
+                <div class="col-12 col-lg-8">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                Sản Phẩm Sắp Hết Hàng
+                            </h5>
+                            <span class="badge bg-danger fs-6">@listSapHet.Count sản phẩm</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive" style="max-height: 360px;">
+                                <table class="table table-hover mb-0 align-middle">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th class="ps-4">Sản phẩm</th>
+                                            <th class="text-center">Tồn kho</th>
+                                            <th class="text-center">Trạng thái</th>
+                                            <th class="text-end pe-4">Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var sp in listSapHet)
+                                        {
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <strong>@sp.TenSP</strong><br>
+                                                    <small class="text-muted">Mã: @sp.MaSP</small>
+                                                </td>
+                                                <td class="text-center">
+                                                    @if (sp.SoLuong <= 5)
+                                                    {
+                                                        <span class="badge bg-danger fs-6">@sp.SoLuong</span>
+                                                    }
+                                                    else if (sp.SoLuong <= 10)
+                                                    {
+                                                        <span class="badge bg-warning text-dark fs-6">@sp.SoLuong</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-info fs-6">@sp.SoLuong</span>
+                                                    }
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-warning text-dark">Sắp hết</span>
+                                                </td>
+                                                <td class="text-end pe-4">
+                                                    <a href="@Url.Action("SanPham", "AdminPage")" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-pencil-square"></i> Cập nhật
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="col-12 col-lg-8">
+                    <div class="card h-100">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-check-circle-fill display-4 text-success d-block mb-3"></i>
+                            <p class="text-success fw-medium mb-0">Tuyệt vời! Không có sản phẩm nào sắp hết hàng.</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+
+    </div>
+</div>

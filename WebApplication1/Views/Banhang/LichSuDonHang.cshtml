@@ -1,0 +1,189 @@
+﻿@model List<WebApplication1.DonHang>
+@{
+    ViewBag.Title = "Lịch sử mua hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* CSS RIÊNG CHO TRANG LỊCH SỬ */
+    .history-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 15px;
+        min-height: 80vh;
+    }
+
+    .page-title {
+        color: #fff;
+        font-weight: 700;
+        margin-bottom: 30px;
+        border-left: 5px solid #2dd4bf; /* Màu xanh ngọc */
+        padding-left: 15px;
+    }
+
+    /* Card đơn hàng */
+    .order-card {
+        background-color: #1e293b; /* Màu nền card tối */
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border-color: #2dd4bf;
+        }
+
+    /* Header của card */
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #334155;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+
+    .order-id {
+        font-weight: bold;
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    .order-date {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    /* Body của card */
+    .order-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .order-info p {
+        margin: 0;
+        color: #cbd5e1;
+    }
+
+    .total-price {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #2dd4bf; /* Màu tiền nổi bật */
+    }
+
+    /* Badge trạng thái */
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .st-cho_xac_nhan {
+        background: rgba(234, 179, 8, 0.2);
+        color: #facc15;
+        border: 1px solid #facc15;
+    }
+
+    .st-dang_giao {
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+        border: 1px solid #60a5fa;
+    }
+
+    .st-hoan_thanh {
+        background: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+        border: 1px solid #4ade80;
+    }
+
+    .st-da_huy {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border: 1px solid #f87171;
+    }
+
+    /* Nút xem chi tiết */
+    .btn-detail {
+        background-color: transparent;
+        border: 1px solid #475569;
+        color: #fff;
+        padding: 8px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: 0.2s;
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+        .btn-detail:hover {
+            background-color: #fff;
+            color: #000;
+        }
+</style>
+
+<div class="history-container">
+    <h2 class="page-title">Lịch sử đơn hàng</h2>
+
+    @if (Model.Count == 0)
+    {
+        <div class="text-center py-5">
+            <img src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png" style="width: 100px; opacity: 0.5;" />
+            <p class="text-muted mt-3">Bạn chưa có đơn hàng nào.</p>
+            <a href="@Url.Action("Index", "Banhang")" class="btn btn-primary mt-2">Mua sắm ngay</a>
+        </div>
+    }
+    else
+    {
+        foreach (var item in Model)
+        {
+            // Xử lý logic hiển thị badge trạng thái
+            string statusClass = "st-default";
+            string statusLabel = item.TrangThai;
+
+            switch (item.TrangThai)
+            {
+                case "cho_xac_nhan": statusClass = "st-cho_xac_nhan"; statusLabel = "Chờ xác nhận"; break;
+                case "dang_giao": statusClass = "st-dang_giao"; statusLabel = "Đang giao hàng"; break;
+                case "hoan_thanh": statusClass = "st-hoan_thanh"; statusLabel = "Thành công"; break;
+                case "da_huy": statusClass = "st-da_huy"; statusLabel = "Đã hủy"; break;
+            }
+
+            <div class="order-card">
+                <div class="order-header">
+                    <div>
+                        <div class="order-id">ĐƠN HÀNG #@item.MaDH</div>
+                        <div class="order-date">@String.Format("{0:dd/MM/yyyy HH:mm}", item.NgayDat)</div>
+                    </div>
+                    <span class="status-badge @statusClass">@statusLabel</span>
+                </div>
+
+                <div class="order-body">
+                    <div class="order-info mb-3 mb-md-0">
+                        <p><i class="bi bi-geo-alt"></i> @item.DiaChiGiao</p>
+                        <p class="text-muted small mt-1">Ghi chú: @(string.IsNullOrEmpty(item.GhiChu) ? "Không có" : item.GhiChu)</p>
+                    </div>
+
+                    <div class="text-md-end">
+                        <div class="mb-2">Tổng tiền</div>
+                        <div class="total-price">@String.Format("{0:#,##0}", item.TongTien)₫</div>
+
+                        <a href="@Url.Action("ChiTietLichSu", "Banhang", new { id = item.MaDH })" class="btn-detail">
+                            Xem chi tiết &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

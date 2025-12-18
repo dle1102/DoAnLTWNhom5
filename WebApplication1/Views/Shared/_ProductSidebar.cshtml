@@ -1,0 +1,32 @@
+﻿<aside class="product-sidebar">
+    <h3>Danh mục sản phẩm</h3>
+    <ul class="product-sidebar__menu">
+        <li class="@(ViewBag.MaLoai == null ? "active" : "")">
+            <a href="@Url.Action("Index", "Banhang")">Tất cả sản phẩm</a>
+        </li>
+        @{
+            var loaiSanPhams = ViewBag.LoaiSanPham as List<LoaiSanPham>;
+            if (loaiSanPhams != null)
+            {
+                foreach (var loai in loaiSanPhams)
+                {
+                    <li class="@(ViewBag.MaLoai == loai.MaLoai ? "active" : "")">
+                        <a href="@Url.Action("Index", "Banhang", new { maLoai = loai.MaLoai })">
+                            @loai.TenLoai
+                        </a>
+                    </li>
+                }
+            }
+        }
+    </ul>
+
+    <div class="product-sidebar__filter">
+        <h4>Lọc nhanh</h4>
+        <p class="product-sidebar__label">Khoảng giá</p>
+        <div class="product-sidebar__chips">
+            <a href="@Url.Action("Index", "Banhang", new { maxPrice = 1000000 })" class="chip">Dưới 1 triệu</a>
+            <a href="@Url.Action("Index", "Banhang", new { minPrice = 1000000, maxPrice = 2000000 })" class="chip">1 – 2 triệu</a>
+            <a href="@Url.Action("Index", "Banhang", new { minPrice = 2000000 })" class="chip">Trên 2 triệu</a>
+        </div>
+    </div>
+</aside>

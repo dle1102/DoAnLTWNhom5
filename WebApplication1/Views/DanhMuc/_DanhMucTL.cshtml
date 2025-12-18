@@ -1,0 +1,9 @@
+﻿@model List<LoaiSanPham>
+
+<ul class="category-list">
+    <li><a href="#">Tat ca</a></li>
+    @foreach (var item in Model)
+    {
+        <li><a href="#">@item.TenLoai</a></li>
+    }
+</ul>

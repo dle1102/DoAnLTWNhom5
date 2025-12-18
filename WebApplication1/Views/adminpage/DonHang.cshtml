@@ -1,0 +1,143 @@
+﻿@model IEnumerable<DonHang>
+@{
+    ViewBag.Title = "Quản Lý Đơn Hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var status = ViewBag.Status ?? "All";
+    var dateRange = ViewBag.DateRange ?? "";
+
+    int page = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int total = ViewBag.TotalResults ?? 0;
+    int startItem = (page - 1) * 10 + 1;
+    int endItem = Math.Min(page * 10, total);
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+       
+        <h1 class="display-5 fw-bold mb-0">Thông Tin Đơn Hàng</h1>
+
+    </div>
+
+    <div class="card shadow">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày đặt</th>
+                        <th>Trạng thái</th>
+                        <th>Tổng tiền</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var dh in Model)
+                        {
+                            // chuỗi hiển thị status (giữ để badge nếu muốn)
+                            string bgColor = "bg-secondary";
+                            string textColor = "text-white";
+                            string statusText = "Không rõ";
+
+                            if (dh.TrangThai != null)
+                            {
+                                if (dh.TrangThai == "hoan_thanh")
+                                {
+                                    bgColor = "bg-success";
+                                    statusText = "Hoàn thành";
+                                }
+                                else if (dh.TrangThai == "dang_giao")
+                                {
+                                    bgColor = "bg-primary";
+                                    statusText = "Đang giao";
+                                }
+                                else if (dh.TrangThai == "cho_xac_nhan")
+                                {
+                                    bgColor = "bg-warning";
+                                    textColor = "text-dark";
+                                    statusText = "Chờ xác nhận";
+                                }
+                                else if (dh.TrangThai == "da_huy")
+                                {
+                                    bgColor = "bg-danger";
+                                    statusText = "Đã hủy";
+                                }
+                                else
+                                {
+                                    statusText = dh.TrangThai;
+                                }
+                            }
+
+                            string tenKH = "Khách lẻ";
+                            if (dh.TaiKhoan != null && dh.TaiKhoan.HoTen != null)
+                            {
+                                tenKH = dh.TaiKhoan.HoTen;
+                            }
+
+                            <tr>
+                                <td class="ps-4"><strong>#@dh.MaDH</strong></td>
+                                <td>
+                                    <div class="fw-bold">@tenKH</div>
+                                    @if (dh.TaiKhoan != null && dh.TaiKhoan.Email != null)
+                                    {
+                                        <small class="text-muted">@dh.TaiKhoan.Email</small>
+                                    }
+                                </td>
+                                <td>@String.Format("{0:dd/MM/yyyy HH:mm}", dh.NgayDat)</td>
+
+                                <!-- TRANG THAI: form để admin thay đổi nhanh -->
+                                <td>
+                                    <span class="@bgColor @textColor px-3 py-1 rounded fw-bold d-inline-block text-center" style="min-width:110px;">
+                                        @statusText
+                                    </span>
+
+                                    @* Chỉ cho phép thay đổi trạng thái nếu đang là "Chờ xác nhận" hoặc "Đang giao" *@
+                                    @if (dh.TrangThai == "cho_xac_nhan" || dh.TrangThai == "dang_giao")
+                                    {
+                                        using (Html.BeginForm("CapNhatTrangThai", "AdminPage", FormMethod.Post, new { @class = "d-inline ms-2" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            @Html.Hidden("MaDH", dh.MaDH)
+                                            @Html.Hidden("returnUrl", Request.RawUrl)
+                                            <select name="TrangThai" class="form-select form-select-sm d-inline-block" style="width:auto; vertical-align:middle;" onchange="this.form.submit()">
+                                                <option value="cho_xac_nhan" @(dh.TrangThai == "cho_xac_nhan" ? "selected" : "")>Chờ xác nhận</option>
+                                                <option value="dang_giao" @(dh.TrangThai == "dang_giao" ? "selected" : "")>Đang giao</option>
+                                                <option value="hoan_thanh" @(dh.TrangThai == "hoan_thanh" ? "selected" : "")>Hoàn thành</option>
+                                                <option value="da_huy" @(dh.TrangThai == "da_huy" ? "selected" : "")>Đã hủy</option>
+                                            </select>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted ms-2"></span>
+                                    }
+                                </td>
+
+                                <td class="text-danger fw-bold">
+                                    @String.Format("{0:#,##0}", dh.TongTien) đ
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="@Url.Action("ChiTietDonHang", "AdminPage", new { id = dh.MaDH })" class="btn btn-sm btn-primary">Xem</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                Không có đơn hàng nào
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ... pagination ... -->
+    </div>
+</div>

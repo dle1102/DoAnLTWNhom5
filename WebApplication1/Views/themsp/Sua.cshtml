@@ -1,0 +1,144 @@
+﻿@model WebApplication1.Models.SP
+@{
+    ViewBag.Title = "Sua";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-11 offset-lg-1 col-xl-10 offset-xl-1">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Chỉnh Sửa Sản Phẩm</h4>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    @using (Html.BeginForm("Suasp", "ThemSP", FormMethod.Post, new { enctype = "multipart/form-data", @class = "needs-validation", novalidate = "" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.MaSP) <!-- Giữ ID sản phẩm -->
+                        @Html.HiddenFor(model => model.NgayTao) <!-- Giữ nguyên ngày tạo cũ -->
+
+                        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger rounded mb-4" })
+
+                        <div class="row g-4">
+                            <!-- Tên Sản Phẩm -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Tên Sản Phẩm</label>
+                                @Html.EditorFor(model => model.TenSP, new { htmlAttributes = new { @class = "form-control", placeholder = "Nhập tên sản phẩm", required = "required" } })
+                                @Html.ValidationMessageFor(model => model.TenSP, "", new { @class = "text-danger" })
+                            </div>
+
+                            <!-- Thể Loại -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Thể Loại</label>
+                                <select name="MaLoai" class="form-select" required>
+                                    <option value="">-- Chọn thể loại sản phẩm --</option>
+                                    @foreach (var tl in Model.ListLoai)
+                                    {
+                                        <option value="@tl.MaLoai" @(Model.MaLoai == tl.MaLoai ? "selected" : "")>@tl.TenLoai</option>
+                                    }
+                                </select>
+                                @Html.ValidationMessageFor(model => model.MaLoai, "", new { @class = "text-danger" })
+                            </div>
+
+                            <!-- Nhà Cung Cấp -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nhà Cung Cấp</label>
+                                <select name="MaNCC" class="form-select" required>
+                                    <option value="">-- Chọn nhà cung cấp --</option>
+                                    @foreach (var ncc in Model.ListNCC)
+                                    {
+                                        <option value="@ncc.MaNCC" @(Model.MaNCC == ncc.MaNCC ? "selected" : "")>@ncc.TenNCC</option>
+                                    }
+                                </select>
+                                @Html.ValidationMessageFor(model => model.MaNCC, "", new { @class = "text-danger" })
+                            </div>
+
+                            <!-- Giá Nhập & Giá Bán -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Giá Nhập</label>
+                                @Html.EditorFor(model => model.GiaNhap, new { htmlAttributes = new { @class = "form-control", type = "number", min = "0", step = "0.01" } })
+                                @Html.ValidationMessageFor(model => model.GiaNhap, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Giá Bán</label>
+                                @Html.EditorFor(model => model.GiaBan, new { htmlAttributes = new { @class = "form-control", type = "number", min = "0", step = "0.01" } })
+                                @Html.ValidationMessageFor(model => model.GiaBan, "", new { @class = "text-danger" })
+                            </div>
+
+                            <!-- Số Lượng -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Số Lượng</label>
+                                @Html.EditorFor(model => model.SoLuong, new { htmlAttributes = new { @class = "form-control", type = "number", min = "0" } })
+                                @Html.ValidationMessageFor(model => model.SoLuong, "", new { @class = "text-danger" })
+                            </div>
+
+                            <!-- Hình Ảnh Hiện Tại + Upload Mới -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Hình Ảnh Hiện Tại</label>
+                                @if (!string.IsNullOrEmpty(Model.HinhAnh))
+                                {
+                                    <div class="mb-2">
+                                        <img src="~/Images/@Model.HinhAnh" class="img-thumbnail" style="max-height: 150px;" alt="Hình sản phẩm" />
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted">Chưa có hình ảnh</p>
+                                }
+
+                                <label class="form-label fw-bold mt-3">Thay Đổi Hình Ảnh</label>
+                                <input type="file" name="AnhBia" class="form-control" accept="image/*" />
+                                <small class="text-muted">Để trống nếu không muốn thay đổi hình</small>
+                            </div>
+
+                            <!-- Mô Tả -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Mô Tả</label>
+                                @Html.TextAreaFor(model => model.MoTa, new { @class = "form-control", rows = "4", placeholder = "Nhập mô tả sản phẩm..." })
+                                @Html.ValidationMessageFor(model => model.MoTa, "", new { @class = "text-danger" })
+                            </div>
+
+                            <!-- Thông Số Kỹ Thuật -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Thông Số Kỹ Thuật</label>
+                                @Html.TextAreaFor(model => model.ThongSoKyThuat, new { @class = "form-control", rows = "6", placeholder = "Nhập thông số kỹ thuật..." })
+                                @Html.ValidationMessageFor(model => model.ThongSoKyThuat, "", new { @class = "text-danger" })
+                            </div>
+
+                            <!-- Nút Lưu -->
+                            <div class="col-12 text-end mt-4">
+                                <button type="submit" class="btn btn-warning btn-lg px-5 py-3">
+                                    <i class="fas fa-save me-2"></i>Lưu Thay Đổi
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer bg-light text-end">
+                    @Html.ActionLink("« Quay Lại Danh Sách", "SanPham", null, new { @class = "btn btn-outline-secondary" })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.from(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+}

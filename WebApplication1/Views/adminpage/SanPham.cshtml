@@ -1,0 +1,169 @@
+﻿@model List<SanPham>
+@using System.Globalization
+@{
+    ViewBag.Title = "SanPham";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    string search = ViewBag.Search ?? "";
+    int totalRecords = ViewBag.TotalRecords ?? 0;
+}
+
+
+<div class="container-fluid px-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <h1 class="display-5 fw-bold mb-0">Sản Phẩm</h1>
+       <a href="@Url.Action("Index", "ThemSP")"
+           class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-plus-lg"></i>
+            <span>Thêm Sản Phẩm Mới</span>
+        </a>
+    </div>
+
+    
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body">
+            <form asp-area="Admin" asp-controller="Admin" asp-action="SanPham" method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-6 col-lg-5">
+                        <label class="form-label fw-medium">Tìm Kiếm</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                            <input type="text" name="search" value="@search" class="form-control border-start-0"
+                                   placeholder="Nhập tên sản phẩm...">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-3 col-lg-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">Tìm kiếm</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Sản Phẩm</th>
+                        <th>Giá</th>
+                        <th>Số Lượng</th>
+                        <th class="text-end pe-4">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var sp in Model)
+                        {
+                            var imgUrl = string.IsNullOrEmpty(sp.HinhAnh) || sp.HinhAnh == "default.jpg"
+                                ? "https://via.placeholder.com/80x80/eee/aaa?text=No+Image"
+                                : Url.Content("~/Content/HinhAnh/" + sp.HinhAnh);
+
+                            var badgeClass = sp.SoLuong > 20 ? "bg-success-subtle text-success" :
+                                            sp.SoLuong > 0 ? "bg-warning-subtle text-warning" : "bg-danger-subtle text-danger";
+                            var badgeText = sp.SoLuong > 20 ? "In Stock" : sp.SoLuong > 0 ? "Low Stock" : "Out of Stock";
+
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="@imgUrl" alt="@sp.TenSP"
+                                             class="rounded shadow-sm" style="width:60px; height:60px; object-fit:cover;">
+                                        <div>
+                                            <div class="fw-semibold text-body">@sp.TenSP</div>
+                                            <small class="text-body-secondary">
+                                                @(sp.LoaiSanPham != null ? sp.LoaiSanPham.TenLoai : "Chưa có loại")
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="fw-semibold text-primary">
+                                    @sp.GiaBan.ToString("#,##0", new CultureInfo("vi-VN")) ₫
+                                </td>
+                                <td>
+                                    <span class="badge @badgeClass rounded-pill px-3 py-2">
+                                        @sp.SoLuong
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="@Url.Action("Sua", "ThemSP", new { id = sp.MaSP })"
+                                       class="btn btn-sm btn-outline-secondary me-1">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </a>
+                                    <a href="@Url.Action("Xoa", "ThemSP", new { id = sp.MaSP })"
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Xóa [@sp.TenSP]?')">
+                                        <i class="bi bi-trash"></i> Xóa
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-5">
+                                <i class="bi bi-box-seam display-1 text-muted d-block mb-3"></i>
+                                <h5 class="text-muted">Chưa có sản phẩm nào</h5>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+       
+        <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center py-3">
+            <div class="text-muted small">
+                Hiển thị <strong>@((currentPage - 1) * 10 + 1)</strong> -
+                <strong>@Math.Min(currentPage * 10, totalRecords)</strong>
+                trong <strong>@totalRecords</strong> sản phẩm
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                  
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("SanPham", "Admin", new { page = currentPage - 1, search = search })">Previous</a>
+                    </li>
+
+                    @{
+                        int start = Math.Max(1, currentPage - 2);
+                        int end = Math.Min(totalPages, currentPage + 2);
+                        if (start > 1)
+                        {
+                            <li class="page-item"><a class="page-link" href="@Url.Action("SanPham", "AdminPage", new { page = 1, search = search })">1</a></li>
+                            if (start > 2)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+ }
+                        }
+
+                        for (int i = start; i <= end; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("SanPham", "AdminPage", new { page = i, search = search })">@i</a>
+                            </li>
+                        }
+
+                        if (end < totalPages)
+                        {
+                            if (end < totalPages - 1)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+ }
+                            <li class="page-item"><a class="page-link" href="@Url.Action("SanPham", "AdminPage", new { page = totalPages, search = search })">@totalPages</a></li>
+                        }
+                    }
+
+                    <!-- Nút Next -->
+                    <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("SanPham", "AdminPage", new { page = currentPage + 1, search = search })">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

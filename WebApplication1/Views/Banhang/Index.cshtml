@@ -1,0 +1,191 @@
+﻿@{
+    ViewBag.Title = "Trang chủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="product-layout">
+    <div class="product-layout__inner">
+        <!-- SIDEBAR BÊN TRÁI -->
+        <div class="product-layout__sidebar">
+            @Html.Partial("_ProductSidebar")
+        </div>
+
+        <!-- NỘI DUNG CHÍNH -->
+        <div class="product-layout__content">
+            <h2>Sản phẩm nổi bật</h2>
+            <div id="product-list" class="product-grid">
+                <!-- Sản phẩm sẽ được tải bằng AJAX -->
+                <div id="loading" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // ================== HÀM GỌI API ==================
+            function loadProducts(maLoai, minPrice, maxPrice) {
+                $('#loading').show();
+                $('#product-list').html(
+                    '<div id="loading" class="text-center py-5">' +
+                        '<div class="spinner-border text-primary" role="status"></div>' +
+                        '<p class="mt-2">Đang tải sản phẩm...</p>' +
+                    '</div>'
+                );
+
+            // Xây dựng URL với tham số
+                let url = '@Url.Content("~/api/sanpham/danhsach")';
+                let params = [];
+
+                if (maLoai && maLoai > 0) params.push('maLoai=' + maLoai);
+                if (minPrice && minPrice > 0) params.push('minPrice=' + minPrice);
+                if (maxPrice && maxPrice > 0) params.push('maxPrice=' + maxPrice);
+
+                if (params.length > 0) {
+                    url += '?' + params.join('&');
+                }
+
+                console.log('API URL:', url);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log('API Response:', data);
+                        $('#loading').hide();
+                        renderProducts(data);
+                    },
+                    error: function (xhr, status, error) {
+                        $('#loading').hide();
+                        console.error('API Error:', status, error, xhr.responseText);
+
+                        let errorMsg = 'Không thể tải sản phẩm';
+                        if (xhr.status === 404) {
+                            errorMsg = 'API không tồn tại. Kiểm tra lại URL.';
+                        } else if (xhr.status === 500) {
+                            errorMsg = 'Lỗi server. Vui lòng thử lại sau.';
+                        }
+
+                        $('#product-list').html(`
+                            <div class="alert alert-danger">
+                                <h5>${errorMsg}</h5>
+                                <p class="mb-0">Chi tiết: ${xhr.status} - ${error}</p>
+                                <button onclick="location.reload()" class="btn btn-sm btn-outline-danger mt-2">
+                                    Thử lại
+                                </button>
+                            </div>
+                        `);
+                    }
+                });
+            }
+
+            // ================== HÀM RENDER SẢN PHẨM ==================
+            function renderProducts(products) {
+                const productList = $('#product-list');
+
+                if (!products || products.length === 0) {
+                    productList.html(`
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            Không tìm thấy sản phẩm nào phù hợp.
+                            <a href="@Url.Action("Index", "BanHang")" class="btn btn-sm btn-outline-info ms-2">
+                                Xem tất cả
+                            </a>
+                        </div>
+                    `);
+                    return;
+                }
+
+                const detailBaseUrl = '@Url.Action("ChiTietSP", "BanHang")';
+                const addToCartBaseUrl = '@Url.Action("ThemGioHang", "GioHang")';
+                const imgBaseUrl = '@Url.Content("~/Content/HinhAnh/")';
+                const noImgUrl = '@Url.Content("~/Content/HinhAnh/no-image.jpg")';
+
+                let html = '';
+                products.forEach(function (item) {
+                    if (!item || !item.MaSP) return;
+
+                    const imageUrl = item.HinhAnh ? (imgBaseUrl + item.HinhAnh) : noImgUrl;
+                    const detailUrl = detailBaseUrl + '?masp=' + item.MaSP;
+                    const addToCartUrl =
+                        addToCartBaseUrl +
+                        '?iMaSP=' + item.MaSP +
+                        '&strURL=' + encodeURIComponent(window.location.href);
+
+                    html += `
+                    <article class="product-card" onclick="window.location.href='${detailUrl}'">
+                        <div class="product-card__img">
+                            <img src="${imageUrl}"
+                                 alt="${item.TenSP || 'Sản phẩm'}"
+                                 class="img-fluid rounded"
+                                 style="width:100%; height:200px; object-fit:cover;"
+                                 onerror="this.src='${noImgUrl}'">
+                        </div>
+
+                        <h3 class="mt-3 mb-2">
+                            <a href="${detailUrl}"
+                               class="text-decoration-none text-cyan"
+                               onclick="event.stopPropagation();">
+                                ${item.TenSP || 'Chưa có tên'}
+                            </a>
+                        </h3>
+
+                        <p class="text-success fw-bold fs-5">
+                            ${formatCurrency(item.GiaBan || 0)} ₫
+                        </p>
+
+                        <a href="${addToCartUrl}"
+                           class="btn btn-secondary w-100"
+                           onclick="event.stopPropagation();">
+                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                        </a>
+                    </article>`;
+                });
+
+                productList.html(html);
+            }
+
+            // ================== FORMAT TIỀN ==================
+            function formatCurrency(amount) {
+                const num = parseFloat(amount) || 0;
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            // ================== LẤY PARAM TỪ URL ==================
+            function getUrlParameter(name) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            }
+
+            // ================== LOAD LẦN ĐẦU ==================
+            const maLoai = getUrlParameter('maLoai') || @(ViewBag.MaLoai != null ? ViewBag.MaLoai : "null");
+            const minPrice = getUrlParameter('minPrice') || @(ViewBag.MinPrice != null ? ViewBag.MinPrice : "null");
+            const maxPrice = getUrlParameter('maxPrice') || @(ViewBag.MaxPrice != null ? ViewBag.MaxPrice : "null");
+
+            loadProducts(maLoai, minPrice, maxPrice);
+
+            // ================== FILTER FORM ==================
+            $(document).on('submit', '.filter-form', function (e) {
+                e.preventDefault();
+
+                const maLoai = $(this).find('[name="maLoai"]').val();
+                const minPrice = $(this).find('[name="minPrice"]').val();
+                const maxPrice = $(this).find('[name="maxPrice"]').val();
+
+                loadProducts(maLoai, minPrice, maxPrice);
+            });
+
+            // ================== RESET FILTER ==================
+            $(document).on('click', '.reset-filter', function (e) {
+                e.preventDefault();
+                loadProducts(null, null, null);
+            });
+        });
+    </script>
+}
