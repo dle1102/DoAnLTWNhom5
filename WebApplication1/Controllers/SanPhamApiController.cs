@@ -13,11 +13,15 @@ namespace WebApplication1.Controllers
         private ShopGearEntities1 BH = new ShopGearEntities1();
         [HttpGet]
         [Route("danhsach")]
-        public IHttpActionResult DanhSach(int? maLoai = null, decimal? minPrice = null, decimal? maxPrice = null)
+        public IHttpActionResult DanhSach(int? maLoai = null, decimal? minPrice = null, decimal? maxPrice = null, string keyword = null)
         {
             IQueryable<SanPham> query = BH.SanPhams;
 
             // Lọc theo loại
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                query = query.Where(sp => sp.TenSP.Contains(keyword) || sp.MoTa.Contains(keyword));
+            }
             if (maLoai.HasValue && maLoai.Value > 0)
             {
                 query = query.Where(sp => sp.MaLoai == maLoai.Value);

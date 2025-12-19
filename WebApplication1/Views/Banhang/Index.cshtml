@@ -29,22 +29,34 @@
     <script>
         $(document).ready(function () {
             // ================== HÀM GỌI API ==================
-            function loadProducts(maLoai, minPrice, maxPrice) {
-                $('#loading').show();
+            function loadProducts(maLoai, minPrice, maxPrice, keyword) {
+                // Hiển thị loading
                 $('#product-list').html(
-                    '<div id="loading" class="text-center py-5">' +
+                    '<div class="text-center py-5">' +
                         '<div class="spinner-border text-primary" role="status"></div>' +
                         '<p class="mt-2">Đang tải sản phẩm...</p>' +
                     '</div>'
                 );
 
-            // Xây dựng URL với tham số
+                // Xây dựng URL với tham số
                 let url = '@Url.Content("~/api/sanpham/danhsach")';
                 let params = [];
 
-                if (maLoai && maLoai > 0) params.push('maLoai=' + maLoai);
-                if (minPrice && minPrice > 0) params.push('minPrice=' + minPrice);
-                if (maxPrice && maxPrice > 0) params.push('maxPrice=' + maxPrice);
+                // Xử lý keyword
+                if (keyword !== null && keyword !== undefined && keyword.toString().trim() !== '') {
+                    params.push('keyword=' + encodeURIComponent(keyword.toString().trim()));
+                }
+
+                // Xử lý các filter khác
+                if (maLoai !== null && maLoai !== undefined && maLoai > 0) {
+                    params.push('maLoai=' + maLoai);
+                }
+                if (minPrice !== null && minPrice !== undefined && minPrice > 0) {
+                    params.push('minPrice=' + minPrice);
+                }
+                if (maxPrice !== null && maxPrice !== undefined && maxPrice > 0) {
+                    params.push('maxPrice=' + maxPrice);
+                }
 
                 if (params.length > 0) {
                     url += '?' + params.join('&');
@@ -58,12 +70,11 @@
                     dataType: 'json',
                     success: function (data) {
                         console.log('API Response:', data);
-                        $('#loading').hide();
                         renderProducts(data);
                     },
                     error: function (xhr, status, error) {
-                        $('#loading').hide();
                         console.error('API Error:', status, error, xhr.responseText);
+                        console.error('Response Text:', xhr.responseText);
 
                         let errorMsg = 'Không thể tải sản phẩm';
                         if (xhr.status === 404) {
@@ -76,6 +87,7 @@
                             <div class="alert alert-danger">
                                 <h5>${errorMsg}</h5>
                                 <p class="mb-0">Chi tiết: ${xhr.status} - ${error}</p>
+                                <p class="mb-0"><small>URL: ${url}</small></p>
                                 <button onclick="location.reload()" class="btn btn-sm btn-outline-danger mt-2">
                                     Thử lại
                                 </button>
@@ -164,27 +176,50 @@
             }
 
             // ================== LOAD LẦN ĐẦU ==================
+            let keyword = getUrlParameter('keyword');
+            if (!keyword) {
+                @if (ViewBag.Keyword != null)
+                {
+                    <text>keyword = '@ViewBag.Keyword';</text>
+                }
+            }
+
             const maLoai = getUrlParameter('maLoai') || @(ViewBag.MaLoai != null ? ViewBag.MaLoai : "null");
             const minPrice = getUrlParameter('minPrice') || @(ViewBag.MinPrice != null ? ViewBag.MinPrice : "null");
             const maxPrice = getUrlParameter('maxPrice') || @(ViewBag.MaxPrice != null ? ViewBag.MaxPrice : "null");
 
-            loadProducts(maLoai, minPrice, maxPrice);
+            // Cập nhật keyword vào input search trong header
+            if (keyword) {
+                $('#search-keyword').val(keyword);
+            }
+
+            // Hiển thị keyword nếu có
+            if (keyword && keyword.trim() !== '') {
+                const contentDiv = $('.product-layout__content');
+                if (contentDiv.find('h2').length > 0) {
+                    contentDiv.find('h2').html(`Kết quả tìm kiếm: "<strong>${keyword}</strong>"`);
+                }
+            }
+
+            loadProducts(maLoai, minPrice, maxPrice, keyword);
 
             // ================== FILTER FORM ==================
             $(document).on('submit', '.filter-form', function (e) {
                 e.preventDefault();
 
+                const keyword = getUrlParameter('keyword'); // Giữ lại keyword khi filter
                 const maLoai = $(this).find('[name="maLoai"]').val();
                 const minPrice = $(this).find('[name="minPrice"]').val();
                 const maxPrice = $(this).find('[name="maxPrice"]').val();
 
-                loadProducts(maLoai, minPrice, maxPrice);
+                loadProducts(maLoai, minPrice, maxPrice, keyword);
             });
 
             // ================== RESET FILTER ==================
             $(document).on('click', '.reset-filter', function (e) {
                 e.preventDefault();
-                loadProducts(null, null, null);
+                const keyword = getUrlParameter('keyword'); // Giữ lại keyword khi reset
+                loadProducts(null, null, null, keyword);
             });
         });
     </script>

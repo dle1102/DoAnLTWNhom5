@@ -20,6 +20,27 @@
 
     </div>
 
+    <!-- Checkbox phân loại trạng thái -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <span class="fw-bold">Lọc theo trạng thái:</span>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="filterCompleted">
+                    <label class="form-check-label" for="filterCompleted">
+                        Đã hoàn thành / Đã hủy (Không thể chỉnh sửa)
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="filterEditable">
+                    <label class="form-check-label" for="filterEditable">
+                        Có thể chỉnh sửa (Chờ xác nhận / Đang giao)
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -78,7 +99,14 @@
                                 tenKH = dh.TaiKhoan.HoTen;
                             }
 
-                            <tr>
+                            // Xác định loại trạng thái để lọc
+                            string statusType = "editable"; // Mặc định là có thể chỉnh sửa
+                            if (dh.TrangThai == "hoan_thanh" || dh.TrangThai == "da_huy")
+                            {
+                                statusType = "completed";
+                            }
+
+                            <tr data-status-type="@statusType">
                                 <td class="ps-4"><strong>#@dh.MaDH</strong></td>
                                 <td>
                                     <div class="fw-bold">@tenKH</div>
@@ -138,6 +166,237 @@
             </table>
         </div>
 
-        <!-- ... pagination ... -->
+        <!-- Phân trang -->
+        @if (total > 0)
+        {
+            <div class="card-footer bg-body border-top">
+                <div class="d-flex flex-wrap justify-content-between align-items-center py-3">
+                    <!-- Thông tin số lượng -->
+                    <div class="text-body-secondary">
+                        @if (totalPages > 1)
+                        {
+                            <text>Hiển thị <strong>@startItem</strong> - <strong>@endItem</strong> của <strong>@total</strong> đơn hàng</text>
+                        }
+                        else
+                        {
+                            <text>Hiển thị tất cả <strong>@total</strong> đơn hàng</text>
+                        }
+                    </div>
+
+                    <!-- Nút phân trang -->
+                    <nav aria-label="Phân trang">
+                        <ul class="pagination mb-0">
+                            <!-- Nút Previous -->
+                            @if (page > 1 && totalPages > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("DonHang", "AdminPage", new { page = page - 1, status = status, dateRange = dateRange })" aria-label="Trước">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-label="Trước">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </span>
+                                </li>
+                            }
+
+                            <!-- Các số trang -->
+                            @if (totalPages > 0)
+                            {
+                                int startPage = Math.Max(1, page - 2);
+                                int endPage = Math.Min(totalPages, page + 2);
+                                
+                                // Hiển thị trang đầu nếu không gần trang 1
+                                if (startPage > 1 && totalPages > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("DonHang", "AdminPage", new { page = 1, status = status, dateRange = dateRange })">1</a>
+                                    </li>
+                                    if (startPage > 2)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+                                }
+
+                                // Hiển thị các trang xung quanh trang hiện tại
+                                for (int i = startPage; i <= endPage; i++)
+                                {
+                                    if (i == page)
+                                    {
+                                        <li class="page-item active">
+                                            <span class="page-link">@i</span>
+                                        </li>
+                                    }
+                                    else if (totalPages > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("DonHang", "AdminPage", new { page = i, status = status, dateRange = dateRange })">@i</a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="page-item active">
+                                            <span class="page-link">@i</span>
+                                        </li>
+                                    }
+                                }
+
+                                // Hiển thị trang cuối nếu không gần trang cuối
+                                if (endPage < totalPages && totalPages > 1)
+                                {
+                                    if (endPage < totalPages - 1)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("DonHang", "AdminPage", new { page = totalPages, status = status, dateRange = dateRange })">@totalPages</a>
+                                    </li>
+                                }
+                            }
+
+                            <!-- Nút Next -->
+                            @if (page < totalPages && totalPages > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("DonHang", "AdminPage", new { page = page + 1, status = status, dateRange = dateRange })" aria-label="Sau">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-label="Sau">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        }
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterCompleted = document.getElementById('filterCompleted');
+        const filterEditable = document.getElementById('filterEditable');
+        const tableRows = document.querySelectorAll('tbody tr[data-status-type]');
+
+        function filterRows() {
+            const showCompleted = filterCompleted.checked;
+            const showEditable = filterEditable.checked;
+
+            // Nếu cả 2 checkbox đều không được tick: hiển thị tất cả
+            if (!showCompleted && !showEditable) {
+                tableRows.forEach(function(row) {
+                    row.style.display = '';
+                });
+            } else {
+                // Nếu có checkbox được tick: chỉ hiển thị các nhóm được tick
+                tableRows.forEach(function(row) {
+                    const statusType = row.getAttribute('data-status-type');
+                    
+                    if (statusType === 'completed') {
+                        row.style.display = showCompleted ? '' : 'none';
+                    } else if (statusType === 'editable') {
+                        row.style.display = showEditable ? '' : 'none';
+                    }
+                });
+            }
+
+            // Kiểm tra nếu không có hàng nào hiển thị, hiển thị thông báo
+            const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
+            const emptyRow = document.querySelector('tbody tr:not([data-status-type])');
+            
+            if (visibleRows.length === 0 && emptyRow) {
+                emptyRow.style.display = '';
+            } else if (emptyRow) {
+                emptyRow.style.display = 'none';
+            }
+        }
+
+        filterCompleted.addEventListener('change', filterRows);
+        filterEditable.addEventListener('change', filterRows);
+    });
+</script>
+
+<style>
+    /* Hỗ trợ dark mode cho phân trang - Bootstrap 5.3+ với data-bs-theme */
+    [data-bs-theme="dark"] .pagination .page-link,
+    body.dark .pagination .page-link,
+    html.dark .pagination .page-link,
+    .dark-mode .pagination .page-link {
+        background-color: #212529;
+        border-color: #495057;
+        color: #f8f9fa;
+    }
+
+    [data-bs-theme="dark"] .pagination .page-link:hover,
+    body.dark .pagination .page-link:hover,
+    html.dark .pagination .page-link:hover,
+    .dark-mode .pagination .page-link:hover {
+        background-color: #495057;
+        border-color: #6c757d;
+        color: #f8f9fa;
+    }
+
+    [data-bs-theme="dark"] .pagination .page-item.active .page-link,
+    body.dark .pagination .page-item.active .page-link,
+    html.dark .pagination .page-item.active .page-link,
+    .dark-mode .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: #ffffff;
+    }
+
+    [data-bs-theme="dark"] .pagination .page-item.disabled .page-link,
+    body.dark .pagination .page-item.disabled .page-link,
+    html.dark .pagination .page-item.disabled .page-link,
+    .dark-mode .pagination .page-item.disabled .page-link {
+        background-color: #212529;
+        border-color: #495057;
+        color: #6c757d;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    [data-bs-theme="dark"] .card-footer,
+    body.dark .card-footer,
+    html.dark .card-footer,
+    .dark-mode .card-footer {
+        background-color: #212529 !important;
+        border-color: #495057 !important;
+    }
+
+    [data-bs-theme="dark"] .text-body-secondary,
+    body.dark .text-body-secondary,
+    html.dark .text-body-secondary,
+    .dark-mode .text-body-secondary {
+        color: #adb5bd !important;
+    }
+
+    /* Hỗ trợ light mode (mặc định) */
+    .pagination .page-link {
+        transition: all 0.2s ease;
+    }
+
+    .pagination .page-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .pagination .page-item.active .page-link {
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+    }
+</style>

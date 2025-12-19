@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Web.Mvc;
+
+using System.Data.Entity.Validation;    
 using System.Web.Security;
 
 namespace WebApplication1.Controllers
@@ -158,6 +160,105 @@ namespace WebApplication1.Controllers
                 }
             }
             return RedirectToAction("Info");
+        }
+        public ActionResult DangKy()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult XuLyDangKy(FormCollection f)
+        {
+
+            string email = f["Email"];
+            string matKhau = f["MatKhau"];
+            string xacNhanMatKhau = f["XacNhanMatKhau"];
+            string hoTen = f["HoTen"];
+            string soDienThoai = f["SoDienThoai"];
+            string diaChi = f["DiaChi"];
+
+            // Validation
+            if (string.IsNullOrEmpty(email))
+            {
+                ViewBag.Error = "Vui lòng nhập email!";
+                return View("DangKy");
+            }
+
+            if (string.IsNullOrEmpty(matKhau))
+            {
+                ViewBag.Error = "Vui lòng nhập mật khẩu!";
+                return View("DangKy");
+            }
+
+            if (matKhau.Length < 6)
+            {
+                ViewBag.Error = "Mật khẩu phải có ít nhất 6 ký tự!";
+                return View("DangKy");
+            }
+
+            if (matKhau != xacNhanMatKhau)
+            {
+                ViewBag.Error = "Xác nhận mật khẩu không khớp!";
+                return View("DangKy");
+            }
+
+            if (string.IsNullOrEmpty(hoTen))
+            {
+                ViewBag.Error = "Vui lòng nhập họ tên!";
+                return View("DangKy");
+            }
+
+            // Kiểm tra email đã tồn tại chưa
+            var emailTonTai = ql.TaiKhoans.FirstOrDefault(t => t.Email == email);
+            if (emailTonTai != null)
+            {
+                ViewBag.Error = "Email này đã được sử dụng! Vui lòng chọn email khác.";
+                return View("DangKy");
+            }
+
+            // Tạo tài khoản mới
+            try
+            {
+                TaiKhoan tkMoi = new TaiKhoan
+                {
+                    TenDangNhap = email,
+                    Email = email,
+                    MatKhau = matKhau,
+                    HoTen = hoTen,
+                    SoDienThoai = soDienThoai ?? "",
+                    DiaChi = diaChi ?? "",
+                    VaiTro = "khachhang", // Mặc định là khách hàng
+                    TrangThai = "active" // Trạng thái hoạt động
+                };
+
+                ql.TaiKhoans.Add(tkMoi);
+                ql.SaveChanges();
+
+                // Đăng ký thành công - tự động đăng nhập
+                FormsAuthentication.SetAuthCookie(tkMoi.Email, false);
+                Session["MaTK"] = tkMoi.MaTK;
+                Session["HoTen"] = tkMoi.HoTen;
+                Session["VaiTro"] = tkMoi.VaiTro;
+                Session["DaVaoAdmin"] = null;
+
+                TempData["Success"] = "Đăng ký tài khoản thành công!";
+                return RedirectToAction("Index", "Banhang");
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+            {
+                // Lấy chi tiết lỗi validation
+                var errorMessages = ex.EntityValidationErrors
+                    .SelectMany(x => x.ValidationErrors)
+                    .Select(x => x.ErrorMessage);
+                var fullErrorMessage = string.Join("; ", errorMessages);
+                ViewBag.Error = "Lỗi validation: " + fullErrorMessage;
+                return View("DangKy");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Có lỗi xảy ra khi đăng ký: " + ex.Message;
+                return View("DangKy");
+            }
         }
     }
 }

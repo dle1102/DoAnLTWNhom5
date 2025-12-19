@@ -11,21 +11,17 @@ namespace WebApplication1.Controllers
         ShopGearEntities1 BH = new ShopGearEntities1();
         //
         // GET: /Banhang/
-        public ActionResult Index(int? maLoai, decimal? minPrice, decimal? maxPrice)
+        public ActionResult Index(int? maLoai, decimal? minPrice, decimal? maxPrice, string keyword)
         {
             ViewBag.LoaiSanPham = BH.LoaiSanPhams.OrderBy(l => l.TenLoai).ToList();
 
-            // 🔸 Lưu lại các tham số filter để view dùng (JS đọc lại)
+           
             ViewBag.MaLoai = maLoai;
             ViewBag.MinPrice = minPrice;
             ViewBag.MaxPrice = maxPrice;
+            ViewBag.Keyword = keyword;
 
-            // ❌ KHÔNG lấy list sản phẩm ở đây nữa
-            // IQueryable<SanPham> query = BH.SanPhams;
-            // ... các Where, ToList() ...
-            // return View(lst);
 
-            // ✅ Chỉ trả về View rỗng (danh sách sẽ được load qua API)
             return View();
         }
 
@@ -83,16 +79,10 @@ namespace WebApplication1.Controllers
                 return RedirectToAction("Index");
             }
 
-            IQueryable<SanPham> query = BH.SanPhams
-                .Where(sp => sp.TenSP.Contains(keyword) || sp.MoTa.Contains(keyword));
-
-            List<SanPham> lst = query.OrderByDescending(s => s.GiaBan).ToList();
-
-            ViewBag.SearchKeyword = keyword;
-            ViewBag.SearchResults = lst.Count;
-
-            return View("Index", lst);
+            // ✅ Redirect về Index với keyword parameter (sẽ được xử lý bởi API)
+            return RedirectToAction("Index", new { keyword = keyword });
         }
+
     }
 
 }

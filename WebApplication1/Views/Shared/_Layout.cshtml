@@ -201,8 +201,8 @@
             </div>
 
             <div class="search-box">
-                <form action="@Url.Action("Search", "Banhang")" method="get" style="display: flex; width: 100%;">
-                    <input type="text" name="keyword" placeholder="Tìm kiếm gear..." required />
+                <form id="search-form" action="@Url.Action("Search", "Banhang")" method="get" style="display: flex; width: 100%;">
+                    <input type="text" id="search-keyword" name="keyword" placeholder="Tìm kiếm gear..." value="@Request.QueryString["keyword"]" />
                     <button type="submit"><i class="bi bi-search"></i></button>
                 </form>
             </div>
@@ -304,6 +304,51 @@
 
         @Scripts.Render("~/bundles/jquery")
         @Scripts.Render("~/bundles/bootstrap")
+        <script>
+            $(document).ready(function () {
+                // Xử lý form tìm kiếm trong header
+                $('#search-form').on('submit', function (e) {
+                    const keyword = $('#search-keyword').val().trim();
+
+                    // Nếu đang ở trang Index (trang sản phẩm), tìm kiếm bằng AJAX
+                    if (window.location.pathname.toLowerCase().includes('/banhang/index') ||
+                        window.location.pathname.toLowerCase().includes('/banhang') &&
+                        !window.location.pathname.toLowerCase().includes('/chitiet')) {
+
+                        e.preventDefault(); // Ngăn submit form mặc định
+
+                        // Cập nhật URL với keyword mới
+                        const url = new URL(window.location.href);
+                        if (keyword) {
+                            url.searchParams.set('keyword', keyword);
+                        } else {
+                            url.searchParams.delete('keyword');
+                        }
+                        // Xóa các filter khác khi search
+                        url.searchParams.delete('maLoai');
+                        url.searchParams.delete('minPrice');
+                        url.searchParams.delete('maxPrice');
+
+                        // Nếu có function loadProducts (từ Index.cshtml), gọi nó
+                        if (typeof loadProducts === 'function') {
+                            loadProducts(null, null, null, keyword);
+                            // Cập nhật tiêu đề
+                            if (keyword) {
+                                $('.product-layout__content h2').html(`Kết quả tìm kiếm: "<strong>${keyword}</strong>"`);
+                            } else {
+                                $('.product-layout__content h2').html('Sản phẩm nổi bật');
+                            }
+                            // Cập nhật URL mà không reload
+                            window.history.pushState({}, '', url);
+                        } else {
+                            // Nếu không có function loadProducts, redirect bình thường
+                            window.location.href = url.toString();
+                        }
+                    }
+                    // Nếu không phải trang Index, submit form bình thường
+                });
+            });
+        </script>
         @RenderSection("scripts", required: false)
     </footer>
 </body>

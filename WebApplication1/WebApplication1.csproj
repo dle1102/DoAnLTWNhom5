@@ -402,6 +402,7 @@
     <Content Include="Views\Banhang\LichSuDonHang.cshtml" />
     <Content Include="Views\Banhang\ChiTietLichSu.cshtml" />
     <Content Include="Views\DangNhap\Info.cshtml" />
+    <Content Include="Views\DangNhap\DangKy.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
